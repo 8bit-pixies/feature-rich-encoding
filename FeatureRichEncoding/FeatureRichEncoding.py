@@ -1,4 +1,7 @@
 from sklearn.base import TransformerMixin
+from sklearn.pipeline import Pipeline, FeatureUnion    
+from sklearn.feature_extraction.text import TfidfVectorizer
+
 from gensim.models import Word2Vec
 import nltk
 from nltk import ne_chunk, pos_tag, word_tokenize
@@ -89,11 +92,13 @@ class FeatureRichEncoding(TransformerMixin):
             if self.mode == 'pos':
                 sentences = [self.get_pos(x1) for x1 in sentences]
         return np.vstack([makeFeatureVec(x1) for x1 in sentences])
+        
+FeatureRichEncodingVectorizer = FeatureUnion([('w2v', FeatureRichEncoding()), ('pos', FeatureRichEncoding(mode='pos')),
+                               ('ner', FeatureRichEncoding(mode='ner')),
+                               ('tfidf', TfidfVectorizer())])
 
-if __name__ == "__main__":
-    from sklearn.pipeline import Pipeline, FeatureUnion
+if __name__ == "__main__":    
     from sklearn.preprocessing import StandardScaler
-    from sklearn.feature_extraction.text import TfidfVectorizer
     sentences = ["It is not known exactly when the text obtained its current standard form",
                  "it may have been as late as the 1960s. Dr. Richard McClintock, a Latin scholar who was the publications director at College in Virginia",
                  "discovered the source of the passage sometime before 1982 while searching for instances of the Latin word"]
